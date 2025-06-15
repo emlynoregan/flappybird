@@ -10,9 +10,38 @@ body {
     background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 100%);
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    padding: 10px;
+}
+
+/* Back Button */
+#back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+#back-link {
+    color: #2C3E50;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+#back-link:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Game Container */
@@ -24,6 +53,7 @@ body {
     background: #000;
     max-width: 100vw;
     max-height: 100vh;
+    margin: 10px 0;
 }
 
 #game-canvas {
@@ -55,11 +85,31 @@ body {
         overflow-x: hidden;
     }
     
+    #back-button {
+        top: 10px;
+        left: 10px;
+    }
+    
+    #back-link {
+        font-size: 16px;
+        padding: 6px 12px;
+    }
+    
     #game-container {
         border: 1px solid #2C3E50;
         margin: 5px;
         max-width: calc(100vw - 10px);
         max-height: calc(100vh - 10px);
+    }
+    
+    #dev-story {
+        margin-top: 15px;
+        padding: 0 10px;
+    }
+    
+    #dev-story p {
+        font-size: 12px;
+        padding: 10px 16px;
     }
 }
 
@@ -105,6 +155,34 @@ body {
     color: white;
     font-size: 24px;
     z-index: 1000;
+}
+
+/* Development Story */
+#dev-story {
+    margin-top: 20px;
+    text-align: center;
+    max-width: 600px;
+}
+
+#dev-story p {
+    color: #2C3E50;
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 12px 20px;
+    border-radius: 25px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 0;
+    line-height: 1.4;
+}
+
+#dev-story strong {
+    color: #1565C0;
+}
+
+#dev-story em {
+    color: #D32F2F;
+    font-style: normal;
+    font-weight: bold;
 }
 
 /* Mobile Touch Optimization */
