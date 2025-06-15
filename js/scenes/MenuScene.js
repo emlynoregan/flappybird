@@ -311,10 +311,9 @@ class MenuScene extends Phaser.Scene {
     }
     
     createFloatingElements() {
-        // Create a simple decorative bird that floats around
+        // Create a decorative bird that looks like the game bird
         this.decorativeBird = this.add.graphics();
-        this.decorativeBird.fillStyle(CONFIG.COLORS.BIRD);
-        this.decorativeBird.fillRect(-12, -12, 24, 24);
+        this.drawDecorativeBird();
         this.decorativeBird.x = 100;
         this.decorativeBird.y = 250;
         
@@ -336,6 +335,72 @@ class MenuScene extends Phaser.Scene {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+        
+        // Wing flapping animation
+        this.time.addEvent({
+            delay: 300,
+            callback: () => {
+                this.decorativeBird.clear();
+                this.drawDecorativeBird(true); // Flap wings
+            },
+            loop: true
+        });
+        
+        this.time.addEvent({
+            delay: 150,
+            callback: () => {
+                this.decorativeBird.clear();
+                this.drawDecorativeBird(false); // Normal wings
+            },
+            loop: true
+        });
+    }
+    
+    drawDecorativeBird(flapping = false) {
+        const size = 16; // Half the size of the game bird for decoration
+        
+        // Bird body (oval shape)
+        this.decorativeBird.fillStyle(CONFIG.COLORS.BIRD); // Golden yellow
+        this.decorativeBird.fillEllipse(0, 0, size * 1.5, size);
+        
+        // Bird beak
+        this.decorativeBird.fillStyle(0xFF8C00); // Orange beak
+        this.decorativeBird.beginPath();
+        this.decorativeBird.moveTo(size * 0.75, -2);
+        this.decorativeBird.lineTo(size * 1.2, 0);
+        this.decorativeBird.lineTo(size * 0.75, 2);
+        this.decorativeBird.closePath();
+        this.decorativeBird.fillPath();
+        
+        // Bird eye
+        this.decorativeBird.fillStyle(0x000000); // Black eye
+        this.decorativeBird.fillCircle(size * 0.3, -size * 0.2, size * 0.15);
+        
+        // Eye highlight
+        this.decorativeBird.fillStyle(0xFFFFFF); // White highlight
+        this.decorativeBird.fillCircle(size * 0.35, -size * 0.25, size * 0.08);
+        
+        // Wing
+        this.decorativeBird.fillStyle(0xDAA520); // Darker gold for wing
+        if (flapping) {
+            // Wing up position
+            this.decorativeBird.fillEllipse(-size * 0.3, -size * 0.6, size * 0.8, size * 0.4);
+        } else {
+            // Wing down position
+            this.decorativeBird.fillEllipse(-size * 0.3, size * 0.1, size * 0.8, size * 0.4);
+        }
+        
+        // Wing outline
+        this.decorativeBird.lineStyle(1, 0xB8860B);
+        if (flapping) {
+            this.decorativeBird.strokeEllipse(-size * 0.3, -size * 0.6, size * 0.8, size * 0.4);
+        } else {
+            this.decorativeBird.strokeEllipse(-size * 0.3, size * 0.1, size * 0.8, size * 0.4);
+        }
+        
+        // Body outline
+        this.decorativeBird.lineStyle(2, 0xB8860B);
+        this.decorativeBird.strokeEllipse(0, 0, size * 1.5, size);
     }
     
     setupInput() {
