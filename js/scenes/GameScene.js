@@ -38,6 +38,87 @@ class GameScene extends Phaser.Scene {
         
         // Start instructions
         this.showStartInstructions();
+        
+        // Initialize difficulty tracking
+        this.currentDifficulty = 1;
+        this.lastDifficultyScore = 0;
+    }
+    
+    calculateDifficultyLevel() {
+        if (!CONFIG.DIFFICULTY_SCALING.ENABLED) {
+            return 1;
+        }
+        
+        const level = Math.floor(this.score / CONFIG.DIFFICULTY_SCALING.SCORE_INTERVAL) + 1;
+        return Math.min(level, CONFIG.DIFFICULTY_SCALING.MAX_DIFFICULTY);
+    }
+    
+    getCurrentPipeSpeed() {
+        const difficulty = this.calculateDifficultyLevel();
+        const speedIncrease = difficulty * CONFIG.DIFFICULTY_SCALING.PIPE_SPEED_INCREASE;
+        const newSpeed = CONFIG.PIPE_SPEED - speedIncrease; // More negative = faster
+        return Math.max(newSpeed, CONFIG.DIFFICULTY_SCALING.MAX_PIPE_SPEED);
+    }
+    
+    getCurrentPipeGap() {
+        const difficulty = this.calculateDifficultyLevel();
+        const gapDecrease = difficulty * CONFIG.DIFFICULTY_SCALING.PIPE_GAP_DECREASE;
+        const newGap = CONFIG.PIPE_GAP - gapDecrease;
+        return Math.max(newGap, CONFIG.DIFFICULTY_SCALING.MIN_PIPE_GAP);
+    }
+    
+    getCurrentSpawnInterval() {
+        const difficulty = this.calculateDifficultyLevel();
+        const spawnIncrease = difficulty * CONFIG.DIFFICULTY_SCALING.SPAWN_RATE_INCREASE;
+        const baseInterval = 2000; // 2 seconds
+        const newInterval = baseInterval / (1 + spawnIncrease);
+        return Math.max(newInterval, CONFIG.DIFFICULTY_SCALING.MIN_SPAWN_INTERVAL);
+    }
+    
+    updateDifficulty() {
+        const newDifficulty = this.calculateDifficultyLevel();
+        
+        if (newDifficulty > this.currentDifficulty) {
+            this.currentDifficulty = newDifficulty;
+            
+            // Update difficulty UI
+            this.difficultyText.setText(`Level: ${newDifficulty}`);
+            
+            // Show difficulty increase notification
+            console.log('🔥 DIFFICULTY INCREASED! Level:', newDifficulty);
+            console.log('  Pipe Speed:', this.getCurrentPipeSpeed());
+            console.log('  Pipe Gap:', this.getCurrentPipeGap());
+            console.log('  Spawn Interval:', this.getCurrentSpawnInterval());
+            
+            // Visual notification (optional)
+            if (newDifficulty > 0) {
+                this.showDifficultyNotification(newDifficulty);
+            }
+        }
+    }
+    
+    showDifficultyNotification(level) {
+        // Create a temporary notification text
+        const notification = this.add.text(CONFIG.GAME_WIDTH / 2, CONFIG.GAME_HEIGHT / 2 - 100, 
+            `DIFFICULTY INCREASED!\nLevel ${level}`, {
+            fontSize: '24px',
+            fill: '#ff4444',
+            fontFamily: 'Courier New',
+            align: 'center',
+            stroke: '#000000',
+            strokeThickness: 2
+        });
+        notification.setOrigin(0.5);
+        
+        // Animate and remove
+        this.tweens.add({
+            targets: notification,
+            alpha: 0,
+            y: notification.y - 50,
+            duration: 2000,
+            ease: 'Power2',
+            onComplete: () => notification.destroy()
+        });
     }
     
     createBackground() {
@@ -131,6 +212,14 @@ class GameScene extends Phaser.Scene {
             fill: '#ffffff',
             fontFamily: 'Courier New'
         });
+        
+        // Difficulty level text
+        this.difficultyText = this.add.text(CONFIG.GAME_WIDTH / 2, CONFIG.SCORE_Y, 'Level: 1', {
+            fontSize: '18px',
+            fill: '#ffff00',
+            fontFamily: 'Courier New'
+        });
+        this.difficultyText.setOrigin(0.5, 0);
     }
     
     showStartInstructions() {
@@ -232,8 +321,8 @@ class GameScene extends Phaser.Scene {
         const currentTime = this.time.now;
         const timeSinceLastSpawn = currentTime - this.lastSpawnTime;
         
-        // Spawn first pipe immediately when game starts, then every 2 seconds
-        const spawnInterval = 2000; // 2 seconds in milliseconds
+        // Spawn interval based on current difficulty
+        const spawnInterval = this.getCurrentSpawnInterval();
         
         // Debug: Log timer progress every second
         const secondsSinceSpawn = Math.floor(timeSinceLastSpawn / 1000);
@@ -279,6 +368,9 @@ class GameScene extends Phaser.Scene {
                 this.score++;
                 this.scoreText.setText(`Score: ${this.score}`);
                 this.soundManager.playScore(); // Play score sound
+                
+                // Check for difficulty increase
+                this.updateDifficulty();
             }
         });
     }

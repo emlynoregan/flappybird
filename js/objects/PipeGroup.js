@@ -57,14 +57,15 @@ class PipePair extends Phaser.GameObjects.Group {
         scene.physics.add.existing(this.topPipe);
         scene.physics.add.existing(this.bottomPipe);
         
-        // Set physics body size to match the main pipe body (without caps)
-        this.topPipe.body.setSize(CONFIG.PIPE_WIDTH, CONFIG.PIPE_HEIGHT);
-        this.bottomPipe.body.setSize(CONFIG.PIPE_WIDTH, CONFIG.PIPE_HEIGHT);
-        
-        // Center the physics body within the sprite
+        // Set physics body size to match the full pipe including caps
         const capHeight = 20;
-        this.topPipe.body.setOffset(4, capHeight); // Offset to skip the cap
-        this.bottomPipe.body.setOffset(4, capHeight); // Offset to skip the cap
+        const fullPipeHeight = CONFIG.PIPE_HEIGHT + capHeight * 2;
+        const fullPipeWidth = CONFIG.PIPE_WIDTH + 8; // Include the wider caps
+        
+        this.topPipe.body.setSize(fullPipeWidth, fullPipeHeight);
+        this.bottomPipe.body.setSize(fullPipeWidth, fullPipeHeight);
+        
+        // No offset needed - collision covers the entire sprite including caps
         
         // Set immovable (pipes don't move when hit)
         this.topPipe.body.setImmovable(true);
@@ -83,22 +84,26 @@ class PipePair extends Phaser.GameObjects.Group {
         this.x = x;
         this.scored = false;
         
-        // Calculate random gap position
-        const minGapY = CONFIG.PIPE_GAP / 2 + 50;
-        const maxGapY = CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT - CONFIG.PIPE_GAP / 2 - 50;
+        // Get current difficulty-adjusted pipe gap
+        const currentPipeGap = this.scene.getCurrentPipeGap ? this.scene.getCurrentPipeGap() : CONFIG.PIPE_GAP;
+        
+        // Calculate random gap position with current gap size
+        const minGapY = currentPipeGap / 2 + 50;
+        const maxGapY = CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT - currentPipeGap / 2 - 50;
         const gapCenterY = Phaser.Math.Between(minGapY, maxGapY);
         
         // Position pipe sprites - physics bodies automatically align!
-        const topPipeY = gapCenterY - CONFIG.PIPE_GAP / 2 - CONFIG.PIPE_HEIGHT / 2;
-        const bottomPipeY = gapCenterY + CONFIG.PIPE_GAP / 2 + CONFIG.PIPE_HEIGHT / 2;
+        const topPipeY = gapCenterY - currentPipeGap / 2 - CONFIG.PIPE_HEIGHT / 2;
+        const bottomPipeY = gapCenterY + currentPipeGap / 2 + CONFIG.PIPE_HEIGHT / 2;
         
         // Set sprite positions - physics bodies automatically follow
         this.topPipe.setPosition(x, topPipeY);
         this.bottomPipe.setPosition(x, bottomPipeY);
         
-        // Set velocity
-        this.topPipe.body.setVelocityX(CONFIG.PIPE_SPEED);
-        this.bottomPipe.body.setVelocityX(CONFIG.PIPE_SPEED);
+        // Set velocity based on current difficulty
+        const currentPipeSpeed = this.scene.getCurrentPipeSpeed ? this.scene.getCurrentPipeSpeed() : CONFIG.PIPE_SPEED;
+        this.topPipe.body.setVelocityX(currentPipeSpeed);
+        this.bottomPipe.body.setVelocityX(currentPipeSpeed);
         
         // Activate
         this.active = true;

@@ -22,7 +22,23 @@ const CONFIG = {
     
     // Game mechanics
     GROUND_HEIGHT: 80,
-    DIFFICULTY_INCREASE_RATE: 0, // For future expansion
+    
+    // Difficulty scaling
+    DIFFICULTY_SCALING: {
+        ENABLED: true,
+        SCORE_INTERVAL: 5, // Increase difficulty every 5 points
+        MAX_DIFFICULTY: 10, // Cap at 10x difficulty multiplier
+        
+        // What increases with difficulty
+        PIPE_SPEED_INCREASE: 20, // Add 20 units per difficulty level
+        PIPE_GAP_DECREASE: 8, // Reduce gap by 8 pixels per difficulty level
+        SPAWN_RATE_INCREASE: 0.1, // Increase spawn frequency by 10% per level
+        
+        // Minimums to prevent impossible gameplay
+        MIN_PIPE_GAP: 120, // Never go below 120 pixels
+        MAX_PIPE_SPEED: -400, // Never exceed 400 speed
+        MIN_SPAWN_INTERVAL: 1200 // Never spawn faster than 1.2 seconds
+    },
     
     // Colors (for geometric shapes before we add sprites)
     COLORS: {
