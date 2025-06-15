@@ -14,14 +14,20 @@ class PipeGroup {
     
     update() {
         // Update all active pipe pairs and remove dead ones
+        const initialCount = this.pipes.length;
         this.pipes = this.pipes.filter(pipePair => {
             pipePair.update();
             if (!pipePair.active) {
+                console.log('Removing inactive pipe');
                 pipePair.destroy();
                 return false;
             }
             return true;
         });
+        
+        if (this.pipes.length !== initialCount) {
+            console.log('Pipe count changed from', initialCount, 'to', this.pipes.length);
+        }
     }
     
     getPipes() {

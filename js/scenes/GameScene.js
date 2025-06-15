@@ -26,8 +26,9 @@ class GameScene extends Phaser.Scene {
         
         // Create pipe group
         this.pipeGroup = new PipeGroup(this);
-        this.pipeTimer = 0;
+        this.lastSpawnTime = null; // Will be set when game starts
         this.nextPipeDistance = CONFIG.PIPE_SPAWN_DISTANCE;
+        console.log('Scene created, spawn timing will be initialized when game starts');
         
         // Create UI
         this.createUI();
@@ -180,8 +181,9 @@ class GameScene extends Phaser.Scene {
         }
         this.bird.flap(); // First flap to start
         
-        // Reset pipe timer for regular spawning
-        this.pipeTimer = 0;
+        // Reset spawn timing for regular spawning
+        this.lastSpawnTime = this.time.now;
+        console.log('Game started, spawn timer reset. Current time:', this.lastSpawnTime);
         
         // Spawn first pipe immediately
         this.time.delayedCall(1000, () => {
@@ -222,17 +224,31 @@ class GameScene extends Phaser.Scene {
     }
     
     spawnPipes() {
-        this.pipeTimer += this.time.delta;
+        // Use absolute time instead of delta time for more reliability
+        if (!this.lastSpawnTime) {
+            this.lastSpawnTime = this.time.now;
+        }
+        
+        const currentTime = this.time.now;
+        const timeSinceLastSpawn = currentTime - this.lastSpawnTime;
         
         // Spawn first pipe immediately when game starts, then every 2 seconds
         const spawnInterval = 2000; // 2 seconds in milliseconds
         
-        if (this.pipeTimer >= spawnInterval) {
+        // Debug: Log timer progress every second
+        const secondsSinceSpawn = Math.floor(timeSinceLastSpawn / 1000);
+        const prevSecondsSinceSpawn = Math.floor((timeSinceLastSpawn - 16) / 1000); // Assuming ~60fps
+        
+        if (secondsSinceSpawn !== prevSecondsSinceSpawn) {
+            console.log('Time since last spawn:', secondsSinceSpawn, 'seconds. Next spawn in:', Math.max(0, Math.ceil((spawnInterval - timeSinceLastSpawn) / 1000)), 'seconds');
+        }
+        
+        if (timeSinceLastSpawn >= spawnInterval) {
             const spawnX = CONFIG.GAME_WIDTH + CONFIG.PIPE_WIDTH;
+            console.log('SPAWNING NEW PIPE! Time since last:', timeSinceLastSpawn, 'Spawn X:', spawnX);
             this.createPipePair(spawnX);
-            this.pipeTimer = 0;
-            console.log('Spawning pipe at:', spawnX, 'Timer was:', this.pipeTimer);
-            console.log('Current active pipes:', this.pipeGroup.getPipes().length);
+            this.lastSpawnTime = currentTime; // Reset the spawn timer
+            console.log('Current active pipes after spawn:', this.pipeGroup.getPipes().length);
         }
     }
     
