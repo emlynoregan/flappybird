@@ -70,7 +70,15 @@ const PHASER_CONFIG = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: CONFIG.GAME_WIDTH,
-        height: CONFIG.GAME_HEIGHT
+        height: CONFIG.GAME_HEIGHT,
+        min: {
+            width: 320,
+            height: 240
+        },
+        max: {
+            width: 1600,
+            height: 1200
+        }
     },
     physics: {
         default: 'arcade',
