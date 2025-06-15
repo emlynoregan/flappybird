@@ -40,17 +40,25 @@ class PipePair extends Phaser.GameObjects.Group {
         
         this.scene = scene;
         
-        // Create top and bottom pipe graphics
-        this.topPipe = scene.add.graphics();
-        this.bottomPipe = scene.add.graphics();
+        // Create top and bottom pipe sprites using the generated texture
+        this.topPipe = scene.add.image(0, 0, 'pipeTexture');
+        this.bottomPipe = scene.add.image(0, 0, 'pipeTexture');
         
-        // Add physics bodies to pipes
+        // Flip the bottom pipe vertically
+        this.bottomPipe.setFlipY(true);
+        
+        // Add physics bodies to pipes - sprites automatically align perfectly!
         scene.physics.add.existing(this.topPipe);
         scene.physics.add.existing(this.bottomPipe);
         
-        // Set up physics bodies
+        // Set physics body size to match the main pipe body (without caps)
         this.topPipe.body.setSize(CONFIG.PIPE_WIDTH, CONFIG.PIPE_HEIGHT);
         this.bottomPipe.body.setSize(CONFIG.PIPE_WIDTH, CONFIG.PIPE_HEIGHT);
+        
+        // Center the physics body within the sprite
+        const capHeight = 20;
+        this.topPipe.body.setOffset(4, capHeight); // Offset to skip the cap
+        this.bottomPipe.body.setOffset(4, capHeight); // Offset to skip the cap
         
         // Set immovable (pipes don't move when hit)
         this.topPipe.body.setImmovable(true);
@@ -74,46 +82,36 @@ class PipePair extends Phaser.GameObjects.Group {
         const maxGapY = CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT - CONFIG.PIPE_GAP / 2 - 50;
         const gapCenterY = Phaser.Math.Between(minGapY, maxGapY);
         
-        // Position top pipe
+        // Position pipe sprites - physics bodies automatically align!
         const topPipeY = gapCenterY - CONFIG.PIPE_GAP / 2 - CONFIG.PIPE_HEIGHT / 2;
-        this.topPipe.setPosition(x, topPipeY);
-        this.topPipe.body.setPosition(x - CONFIG.PIPE_WIDTH / 2, topPipeY - CONFIG.PIPE_HEIGHT / 2);
-        
-        // Position bottom pipe
         const bottomPipeY = gapCenterY + CONFIG.PIPE_GAP / 2 + CONFIG.PIPE_HEIGHT / 2;
-        this.bottomPipe.setPosition(x, bottomPipeY);
-        this.bottomPipe.body.setPosition(x - CONFIG.PIPE_WIDTH / 2, bottomPipeY - CONFIG.PIPE_HEIGHT / 2);
         
-        // Draw pipes
-        this.drawPipe(this.topPipe);
-        this.drawPipe(this.bottomPipe);
+        // Set sprite positions - physics bodies automatically follow
+        this.topPipe.setPosition(x, topPipeY);
+        this.bottomPipe.setPosition(x, bottomPipeY);
         
         // Set velocity
         this.topPipe.body.setVelocityX(CONFIG.PIPE_SPEED);
         this.bottomPipe.body.setVelocityX(CONFIG.PIPE_SPEED);
         
         // Activate
+        this.active = true;
         this.setActive(true);
         this.setVisible(true);
         this.topPipe.setActive(true);
         this.bottomPipe.setActive(true);
         this.topPipe.setVisible(true);
         this.bottomPipe.setVisible(true);
+        
+        console.log('Pipe spawned and activated at x:', x);
     }
     
-    drawPipe(pipe) {
-        pipe.clear();
-        pipe.fillStyle(CONFIG.COLORS.PIPE);
-        pipe.fillRect(-CONFIG.PIPE_WIDTH / 2, -CONFIG.PIPE_HEIGHT / 2, CONFIG.PIPE_WIDTH, CONFIG.PIPE_HEIGHT);
-        
-        // Add a simple border
-        pipe.lineStyle(2, 0x228B22);
-        pipe.strokeRect(-CONFIG.PIPE_WIDTH / 2, -CONFIG.PIPE_HEIGHT / 2, CONFIG.PIPE_WIDTH, CONFIG.PIPE_HEIGHT);
-    }
+
     
     update() {
         // Check if pipes have moved off screen
         if (this.topPipe.x < -CONFIG.PIPE_WIDTH) {
+            console.log('Pipe moved off screen, killing at x:', this.topPipe.x);
             this.kill();
         }
         
@@ -122,6 +120,9 @@ class PipePair extends Phaser.GameObjects.Group {
     }
     
     kill() {
+        // Mark as inactive for removal
+        this.active = false;
+        
         // Deactivate
         this.setActive(false);
         this.setVisible(false);
@@ -134,9 +135,7 @@ class PipePair extends Phaser.GameObjects.Group {
         this.topPipe.body.setVelocity(0, 0);
         this.bottomPipe.body.setVelocity(0, 0);
         
-        // Clear graphics
-        this.topPipe.clear();
-        this.bottomPipe.clear();
+        console.log('Pipe killed and marked inactive');
     }
     
     // Check if bird has passed this pipe for scoring

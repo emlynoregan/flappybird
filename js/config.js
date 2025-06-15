@@ -10,7 +10,7 @@ const CONFIG = {
     
     // Pipe settings
     PIPE_SPEED: -200,
-    PIPE_GAP: 120,
+    PIPE_GAP: 240, // Increased to 240 for much easier gameplay
     PIPE_SPAWN_DISTANCE: 200,
     PIPE_WIDTH: 64,
     PIPE_HEIGHT: 400,
@@ -54,7 +54,7 @@ const PHASER_CONFIG = {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 }, // We'll handle gravity manually on the bird
-            debug: false // Set to true for debugging collision boxes
+            debug: true // Set to true for debugging collision boxes
         }
     },
     scene: [] // Will be populated in game.js

@@ -7,19 +7,23 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         
-        // Set up physics body
-        this.body.setSize(CONFIG.BIRD_SIZE, CONFIG.BIRD_SIZE);
+        // Set up physics body - make it much smaller for very forgiving collision
+        this.body.setSize(CONFIG.BIRD_SIZE - 8, CONFIG.BIRD_SIZE - 8);
+        this.body.setOffset(4, 4); // Center the much smaller collision box within the bird
         this.body.setCollideWorldBounds(false); // We'll handle world collision manually
         
         // Don't apply gravity until game starts
         this.body.setGravityY(0);
         
-        // Create a simple colored rectangle for visualization
+        // Create a proper bird sprite using graphics
         this.graphics = scene.add.graphics();
-        this.graphics.fillStyle(CONFIG.COLORS.BIRD);
-        this.graphics.fillRect(0, 0, CONFIG.BIRD_SIZE, CONFIG.BIRD_SIZE);
+        this.drawBirdSprite();
         this.graphics.x = x - CONFIG.BIRD_SIZE / 2;
         this.graphics.y = y - CONFIG.BIRD_SIZE / 2;
+        
+        // Animation properties
+        this.wingFrame = 0;
+        this.wingAnimTimer = 0;
         
         // Bird state
         this.isDead = false;
@@ -33,6 +37,38 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         this.scene = scene;
     }
     
+    drawBirdSprite() {
+        this.graphics.clear();
+        
+        const size = CONFIG.BIRD_SIZE;
+        const halfSize = size / 2;
+        
+        // Bird body (oval shape)
+        this.graphics.fillStyle(0xFFD700); // Golden yellow
+        this.graphics.fillEllipse(halfSize, halfSize, size * 0.8, size * 0.6);
+        
+        // Bird wing (changes based on animation frame)
+        this.graphics.fillStyle(0xFFA500); // Orange wing
+        const wingOffset = Math.sin(this.wingFrame * 0.5) * 3;
+        this.graphics.fillEllipse(halfSize - 2, halfSize - 2 + wingOffset, size * 0.4, size * 0.3);
+        
+        // Bird beak
+        this.graphics.fillStyle(0xFF8C00); // Dark orange beak
+        this.graphics.fillTriangle(
+            halfSize + size * 0.3, halfSize - 2,
+            halfSize + size * 0.5, halfSize,
+            halfSize + size * 0.3, halfSize + 2
+        );
+        
+        // Bird eye
+        this.graphics.fillStyle(0x000000); // Black eye
+        this.graphics.fillCircle(halfSize + 2, halfSize - 4, 2);
+        
+        // Eye highlight
+        this.graphics.fillStyle(0xFFFFFF);
+        this.graphics.fillCircle(halfSize + 3, halfSize - 5, 1);
+    }
+    
     flap() {
         if (!this.isDead) {
             // Enable gravity on first flap if not already enabled
@@ -43,6 +79,10 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
             // Apply upward velocity
             this.body.setVelocityY(CONFIG.FLAP_POWER);
             this.hasFlapped = true;
+            
+            // Animate wing flap
+            this.wingFrame = 0;
+            this.drawBirdSprite();
             
             // Visual feedback - slight rotation and scale
             this.setRotation(-0.3); // Tilt up slightly
@@ -66,6 +106,14 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         this.graphics.x = this.x - CONFIG.BIRD_SIZE / 2;
         this.graphics.y = this.y - CONFIG.BIRD_SIZE / 2;
         
+        // Animate wings
+        this.wingAnimTimer += 16; // Roughly 60fps
+        if (this.wingAnimTimer >= 150) { // Change frame every 150ms
+            this.wingFrame++;
+            this.drawBirdSprite();
+            this.wingAnimTimer = 0;
+        }
+        
         // Only check bounds and apply rotation if gravity is active (game started)
         if (this.body.gravity.y > 0) {
             // Check if bird is out of bounds
@@ -86,6 +134,11 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         if (!this.isDead) {
             this.isDead = true;
             
+            // Play death sound
+            if (this.scene.soundManager) {
+                this.scene.soundManager.playDeath();
+            }
+            
             // Stop any existing tweens
             if (this.flapTween) {
                 this.flapTween.stop();
@@ -99,10 +152,19 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
                 ease: 'Bounce.easeOut'
             });
             
-            // Change color to indicate death
+            // Change appearance to indicate death
             this.graphics.clear();
-            this.graphics.fillStyle(0xFF0000); // Red
-            this.graphics.fillRect(0, 0, CONFIG.BIRD_SIZE, CONFIG.BIRD_SIZE);
+            const size = CONFIG.BIRD_SIZE;
+            const halfSize = size / 2;
+            
+            // Dead bird (gray and flat)
+            this.graphics.fillStyle(0x808080); // Gray
+            this.graphics.fillEllipse(halfSize, halfSize, size * 0.8, size * 0.4);
+            
+            // X eyes
+            this.graphics.lineStyle(2, 0x000000);
+            this.graphics.lineBetween(halfSize - 2, halfSize - 6, halfSize + 2, halfSize - 2);
+            this.graphics.lineBetween(halfSize + 2, halfSize - 6, halfSize - 2, halfSize - 2);
         }
     }
     
@@ -120,9 +182,9 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         this.hasFlapped = false;
         
         // Reset graphics
-        this.graphics.clear();
-        this.graphics.fillStyle(CONFIG.COLORS.BIRD);
-        this.graphics.fillRect(0, 0, CONFIG.BIRD_SIZE, CONFIG.BIRD_SIZE);
+        this.wingFrame = 0;
+        this.wingAnimTimer = 0;
+        this.drawBirdSprite();
         
         // Stop any tweens
         if (this.flapTween) {

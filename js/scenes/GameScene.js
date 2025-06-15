@@ -9,8 +9,14 @@ class GameScene extends Phaser.Scene {
         this.gameOver = false;
         this.gameStarted = false;
         
+        // Create sound manager
+        this.soundManager = new SoundManager();
+        
         // Add fade in transition
         this.cameras.main.fadeIn(300, 0, 0, 0);
+        
+        // Create background
+        this.createBackground();
         
         // Create ground
         this.createGround();
@@ -33,11 +39,67 @@ class GameScene extends Phaser.Scene {
         this.showStartInstructions();
     }
     
+    createBackground() {
+        // Create sky background
+        const graphics = this.add.graphics();
+        graphics.fillStyle(0x87CEEB); // Sky blue
+        graphics.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT);
+        
+        // Add some clouds
+        this.createClouds();
+    }
+    
+    createClouds() {
+        // Create some decorative clouds
+        for (let i = 0; i < 5; i++) {
+            const cloud = this.add.graphics();
+            const x = Math.random() * CONFIG.GAME_WIDTH * 1.5; // Start some off-screen to the right
+            const y = Math.random() * CONFIG.GAME_HEIGHT * 0.4;
+            
+            // Cloud made of circles
+            cloud.fillStyle(0xFFFFFF, 0.8);
+            cloud.fillCircle(0, 0, 15);
+            cloud.fillCircle(12, -5, 12);
+            cloud.fillCircle(-8, -8, 10);
+            cloud.fillCircle(20, 0, 8);
+            cloud.fillCircle(-15, 0, 10);
+            
+            cloud.x = x;
+            cloud.y = y;
+            
+            // Animate clouds slowly from right to left (parallax effect)
+            this.tweens.add({
+                targets: cloud,
+                x: -100, // Move to left edge off-screen
+                duration: 30000 + Math.random() * 20000,
+                repeat: -1,
+                ease: 'Linear',
+                onComplete: () => {
+                    // Reset to right side when animation completes
+                    cloud.x = CONFIG.GAME_WIDTH + 100;
+                }
+            });
+        }
+    }
+    
     createGround() {
-        // Create ground graphics
+        // Create ground graphics with texture
         this.ground = this.add.graphics();
-        this.ground.fillStyle(CONFIG.COLORS.GROUND);
+        
+        // Ground base
+        this.ground.fillStyle(0x8B4513); // Brown
         this.ground.fillRect(0, CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT, CONFIG.GAME_WIDTH, CONFIG.GROUND_HEIGHT);
+        
+        // Grass on top
+        this.ground.fillStyle(0x228B22); // Green grass
+        this.ground.fillRect(0, CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT, CONFIG.GAME_WIDTH, 8);
+        
+        // Add some texture details
+        for (let i = 0; i < CONFIG.GAME_WIDTH; i += 20) {
+            const grassHeight = Math.random() * 3 + 2;
+            this.ground.fillStyle(0x32CD32, 0.7);
+            this.ground.fillRect(i, CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT - grassHeight, 3, grassHeight);
+        }
         
         // Create an invisible rectangle for ground collision
         this.groundCollider = this.add.rectangle(
@@ -106,6 +168,7 @@ class GameScene extends Phaser.Scene {
             this.startGame();
         } else if (!this.gameOver) {
             this.bird.flap();
+            this.soundManager.playFlap(); // Play flap sound
         }
         // Game over input is now handled by GameOverScene
     }
@@ -116,6 +179,15 @@ class GameScene extends Phaser.Scene {
             this.instructionText.destroy();
         }
         this.bird.flap(); // First flap to start
+        
+        // Reset pipe timer for regular spawning
+        this.pipeTimer = 0;
+        
+        // Spawn first pipe immediately
+        this.time.delayedCall(1000, () => {
+            this.createPipePair(CONFIG.GAME_WIDTH + CONFIG.PIPE_WIDTH);
+            console.log('First pipe spawned!');
+        });
     }
     
     update() {
@@ -152,9 +224,15 @@ class GameScene extends Phaser.Scene {
     spawnPipes() {
         this.pipeTimer += this.time.delta;
         
-        if (this.pipeTimer >= this.nextPipeDistance * 10) { // Convert to milliseconds
-            this.createPipePair(CONFIG.GAME_WIDTH + CONFIG.PIPE_WIDTH);
+        // Spawn first pipe immediately when game starts, then every 2 seconds
+        const spawnInterval = 2000; // 2 seconds in milliseconds
+        
+        if (this.pipeTimer >= spawnInterval) {
+            const spawnX = CONFIG.GAME_WIDTH + CONFIG.PIPE_WIDTH;
+            this.createPipePair(spawnX);
             this.pipeTimer = 0;
+            console.log('Spawning pipe at:', spawnX, 'Timer was:', this.pipeTimer);
+            console.log('Current active pipes:', this.pipeGroup.getPipes().length);
         }
     }
     
@@ -184,6 +262,7 @@ class GameScene extends Phaser.Scene {
                 pipePair.markScored();
                 this.score++;
                 this.scoreText.setText(`Score: ${this.score}`);
+                this.soundManager.playScore(); // Play score sound
             }
         });
     }
