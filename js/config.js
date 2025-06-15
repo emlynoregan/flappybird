@@ -16,7 +16,7 @@ const CONFIG = {
     PIPE_HEIGHT: 400,
     
     // Bird settings
-    BIRD_SIZE: 24,
+    BIRD_SIZE: 32,
     BIRD_START_X: 150,
     BIRD_START_Y: 300,
     
@@ -70,7 +70,7 @@ const PHASER_CONFIG = {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 }, // We'll handle gravity manually on the bird
-            debug: true // Set to true for debugging collision boxes
+            debug: false // Set to true for debugging collision boxes
         }
     },
     scene: [] // Will be populated in game.js

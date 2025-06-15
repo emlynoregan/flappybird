@@ -7,6 +7,9 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         
+        // Make the sprite invisible since we're using graphics for the bird appearance
+        this.setVisible(false);
+        
         // Set up physics body - make it much smaller for very forgiving collision
         this.body.setSize(CONFIG.BIRD_SIZE - 8, CONFIG.BIRD_SIZE - 8);
         this.body.setOffset(4, 4); // Center the much smaller collision box within the bird
@@ -42,31 +45,91 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         
         const size = CONFIG.BIRD_SIZE;
         const halfSize = size / 2;
+        const wingBeat = Math.sin(this.wingFrame * 0.8) * 2;
         
-        // Bird body (oval shape)
-        this.graphics.fillStyle(0xFFD700); // Golden yellow
-        this.graphics.fillEllipse(halfSize, halfSize, size * 0.8, size * 0.6);
+        // Tail feathers (draw first, behind body)
+        this.graphics.fillStyle(0xFF6B35); // Darker orange tail
+        const tailSpread = Math.sin(this.wingFrame * 0.4) * 1;
+        this.graphics.fillEllipse(halfSize - 8, halfSize + 1 + tailSpread, size * 0.35, size * 0.25);
+        this.graphics.fillStyle(0xE55100); // Even darker tail stripes
+        this.graphics.fillEllipse(halfSize - 7, halfSize + 2 + tailSpread, size * 0.25, size * 0.15);
         
-        // Bird wing (changes based on animation frame)
-        this.graphics.fillStyle(0xFFA500); // Orange wing
-        const wingOffset = Math.sin(this.wingFrame * 0.5) * 3;
-        this.graphics.fillEllipse(halfSize - 2, halfSize - 2 + wingOffset, size * 0.4, size * 0.3);
+        // Bird body (plump, rounded bird shape)
+        this.graphics.fillStyle(0xFFD54F); // Bright yellow body
+        this.graphics.fillEllipse(halfSize - 1, halfSize + 2, size * 0.85, size * 0.75);
         
-        // Bird beak
-        this.graphics.fillStyle(0xFF8C00); // Dark orange beak
+        // Chest/belly (lighter area)
+        this.graphics.fillStyle(0xFFF176, 0.8); // Light yellow chest
+        this.graphics.fillEllipse(halfSize + 1, halfSize + 4, size * 0.5, size * 0.45);
+        
+        // Bird head (round, overlapping body)
+        this.graphics.fillStyle(0xFFD54F); // Same bright yellow
+        this.graphics.fillCircle(halfSize + 3, halfSize - 1, size * 0.4);
+        
+        // Wing (animated with realistic bird wing shape)
+        this.graphics.fillStyle(0xFF9800); // Orange wing
+        
+        // Wing main body (elliptical shape)
+        this.graphics.fillEllipse(halfSize - 2, halfSize + 1 + wingBeat, size * 0.4, size * 0.3);
+        
+        // Wing tip (smaller ellipse)
+        this.graphics.fillEllipse(halfSize - 5, halfSize - 1 + wingBeat, size * 0.25, size * 0.2);
+        
+        // Wing feather details
+        this.graphics.fillStyle(0xE65100, 0.7); // Darker wing markings
+        this.graphics.fillEllipse(halfSize - 4, halfSize + 1 + wingBeat, size * 0.25, size * 0.15);
+        
+        // Beak (prominent bird beak)
+        this.graphics.fillStyle(0xFF5722); // Bright orange-red beak
         this.graphics.fillTriangle(
-            halfSize + size * 0.3, halfSize - 2,
-            halfSize + size * 0.5, halfSize,
-            halfSize + size * 0.3, halfSize + 2
+            halfSize + size * 0.45, halfSize - 2,
+            halfSize + size * 0.65, halfSize,
+            halfSize + size * 0.45, halfSize + 2
         );
         
-        // Bird eye
-        this.graphics.fillStyle(0x000000); // Black eye
-        this.graphics.fillCircle(halfSize + 2, halfSize - 4, 2);
+        // Beak highlight
+        this.graphics.fillStyle(0xFF8A50);
+        this.graphics.fillTriangle(
+            halfSize + size * 0.45, halfSize - 1,
+            halfSize + size * 0.55, halfSize,
+            halfSize + size * 0.45, halfSize + 1
+        );
         
-        // Eye highlight
+        // Large expressive eye
+        this.graphics.fillStyle(0xFFFFFF); // White eye background
+        this.graphics.fillCircle(halfSize + 5, halfSize - 2, 4);
+        
+        this.graphics.fillStyle(0x1A1A1A); // Dark pupil
+        this.graphics.fillCircle(halfSize + 6, halfSize - 2, 2.5);
+        
+        // Eye shine (makes it look alive)
         this.graphics.fillStyle(0xFFFFFF);
-        this.graphics.fillCircle(halfSize + 3, halfSize - 5, 1);
+        this.graphics.fillCircle(halfSize + 7, halfSize - 3, 1.2);
+        
+        // Small secondary eye shine
+        this.graphics.fillStyle(0xFFFFFF, 0.6);
+        this.graphics.fillCircle(halfSize + 5.5, halfSize - 1, 0.8);
+        
+        // Eyebrow area (slight color variation)
+        this.graphics.fillStyle(0xFFC107, 0.5);
+        this.graphics.fillEllipse(halfSize + 4, halfSize - 4, size * 0.25, size * 0.15);
+        
+        // Small feet (when wings are down)
+        if (wingBeat < 0) {
+            this.graphics.fillStyle(0xFF5722); // Orange feet
+            this.graphics.fillCircle(halfSize - 1, halfSize + 9, 1.5);
+            this.graphics.fillCircle(halfSize + 2, halfSize + 9, 1.5);
+            
+            // Tiny claws
+            this.graphics.lineStyle(1, 0xD84315);
+            this.graphics.lineBetween(halfSize - 1, halfSize + 10, halfSize - 1, halfSize + 11);
+            this.graphics.lineBetween(halfSize + 2, halfSize + 10, halfSize + 2, halfSize + 11);
+        }
+        
+        // Body outline for definition
+        this.graphics.lineStyle(1, 0xF57F17, 0.3);
+        this.graphics.strokeCircle(halfSize + 3, halfSize - 1, size * 0.4); // Head outline
+        this.graphics.strokeEllipse(halfSize - 1, halfSize + 2, size * 0.85, size * 0.75); // Body outline
     }
     
     flap() {
@@ -106,12 +169,15 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
         this.graphics.x = this.x - CONFIG.BIRD_SIZE / 2;
         this.graphics.y = this.y - CONFIG.BIRD_SIZE / 2;
         
-        // Animate wings
-        this.wingAnimTimer += 16; // Roughly 60fps
-        if (this.wingAnimTimer >= 150) { // Change frame every 150ms
-            this.wingFrame++;
-            this.drawBirdSprite();
-            this.wingAnimTimer = 0;
+        // Only animate and update bird appearance if not dead
+        if (!this.isDead) {
+            // Animate wings
+            this.wingAnimTimer += 16; // Roughly 60fps
+            if (this.wingAnimTimer >= 150) { // Change frame every 150ms
+                this.wingFrame++;
+                this.drawBirdSprite();
+                this.wingAnimTimer = 0;
+            }
         }
         
         // Only check bounds and apply rotation if gravity is active (game started)
@@ -157,14 +223,30 @@ class Bird extends Phaser.Physics.Arcade.Sprite {
             const size = CONFIG.BIRD_SIZE;
             const halfSize = size / 2;
             
-            // Dead bird (gray and flat)
-            this.graphics.fillStyle(0x808080); // Gray
-            this.graphics.fillEllipse(halfSize, halfSize, size * 0.8, size * 0.4);
+            // Dead bird body (dulled colors, flattened)
+            this.graphics.fillStyle(0x999999); // Gray body
+            this.graphics.fillEllipse(halfSize - 1, halfSize + 2, size * 0.85, size * 0.5);
             
-            // X eyes
-            this.graphics.lineStyle(2, 0x000000);
-            this.graphics.lineBetween(halfSize - 2, halfSize - 6, halfSize + 2, halfSize - 2);
-            this.graphics.lineBetween(halfSize + 2, halfSize - 6, halfSize - 2, halfSize - 2);
+            // Dead bird head
+            this.graphics.fillStyle(0x999999);
+            this.graphics.fillCircle(halfSize + 3, halfSize - 1, size * 0.35);
+            
+            // Drooped wing
+            this.graphics.fillStyle(0x666666);
+            this.graphics.fillEllipse(halfSize - 2, halfSize + 3, size * 0.3, size * 0.2);
+            
+            // Beak (unchanged)
+            this.graphics.fillStyle(0xFF5722);
+            this.graphics.fillTriangle(
+                halfSize + size * 0.45, halfSize - 2,
+                halfSize + size * 0.65, halfSize,
+                halfSize + size * 0.45, halfSize + 2
+            );
+            
+            // X eyes (larger and more prominent)
+            this.graphics.lineStyle(3, 0x000000);
+            this.graphics.lineBetween(halfSize + 2, halfSize - 4, halfSize + 8, halfSize + 2);
+            this.graphics.lineBetween(halfSize + 8, halfSize - 4, halfSize + 2, halfSize + 2);
         }
     }
     
