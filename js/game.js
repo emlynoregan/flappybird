@@ -33,11 +33,15 @@ class FlappyBirdGame {
     }
 }
 
-// Initialize the game when the page loads
-window.addEventListener('load', () => {
+// Initialize the game when called (after all scripts are loaded)
+function initializeFlappyBirdGame() {
     // Create the game instance
     window.flappyBirdGame = new FlappyBirdGame();
-});
+    console.log('🎮 Flappy Bird Game Instance Created!');
+}
+
+// Make initialization function available globally
+window.initializeFlappyBirdGame = initializeFlappyBirdGame;
 
 // Handle page visibility changes (pause when tab is not active)
 document.addEventListener('visibilitychange', () => {

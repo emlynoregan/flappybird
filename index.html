@@ -11,6 +11,18 @@
         <a href="https://emlynoregan.com" id="back-link">← back</a>
     </div>
     
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div id="loading-content">
+            <div id="loading-bird">🐦</div>
+            <div id="loading-text">Loading Flappy Bird Game...</div>
+            <div id="loading-progress">
+                <div id="loading-bar"></div>
+            </div>
+            <div id="loading-status">Initializing...</div>
+        </div>
+    </div>
+    
     <div id="game-container">
         <div id="game-canvas"></div>
     </div>
@@ -21,6 +33,41 @@
     
     <!-- Phaser.js CDN - Multiple fallback sources -->
     <script>
+        // Loading progress tracking
+        let loadingProgress = 0;
+        const totalSteps = 10; // 1 for Phaser + 8 game scripts + 1 for initialization
+        
+        function updateLoadingProgress(step, status) {
+            loadingProgress = step;
+            const percentage = Math.round((loadingProgress / totalSteps) * 100);
+            
+            const progressBar = document.getElementById('loading-bar');
+            const statusText = document.getElementById('loading-status');
+            
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+            }
+            
+            if (statusText) {
+                statusText.textContent = status;
+            }
+            
+            console.log(`Loading Progress: ${percentage}% - ${status}`);
+        }
+        
+        function hideLoadingOverlay() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            }
+        }
+        
+        // Make hideLoadingOverlay available globally
+        window.hideLoadingOverlay = hideLoadingOverlay;
+        
         // Try multiple CDN sources in order
         const phaserCDNs = [
             'https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js',
@@ -48,9 +95,20 @@
             
             function loadNextScript() {
                 if (scriptIndex >= scripts.length) {
+                    updateLoadingProgress(totalSteps, 'Starting game...');
                     console.log('🎮 All game scripts loaded successfully!');
+                    
+                    // Initialize the game now that all scripts are loaded
+                    setTimeout(() => {
+                        if (window.initializeFlappyBirdGame) {
+                            window.initializeFlappyBirdGame();
+                        }
+                    }, 100);
+                    
                     return;
                 }
+                
+                updateLoadingProgress(2 + scriptIndex, `Loading ${scripts[scriptIndex].split('/').pop()}...`);
                 
                 const script = document.createElement('script');
                 script.src = scripts[scriptIndex];
@@ -61,6 +119,7 @@
                 };
                 script.onerror = function() {
                     console.error('❌ Failed to load script:', scripts[scriptIndex]);
+                    updateLoadingProgress(2 + scriptIndex, `Error loading ${scripts[scriptIndex].split('/').pop()}`);
                     scriptIndex++;
                     loadNextScript();
                 };
@@ -72,9 +131,11 @@
         
         function loadPhaser() {
             if (cdnIndex >= phaserCDNs.length) {
-                document.body.innerHTML = '<div style="color: red; text-align: center; margin-top: 50px; font-family: Arial; padding: 20px;">❌ Error: Could not load Phaser.js from any CDN.<br><br>Please check your internet connection and try:<br>1. Refreshing the page<br>2. Disabling ad blockers<br>3. Checking firewall settings</div>';
+                document.getElementById('loading-content').innerHTML = '<div style="color: red; text-align: center;">❌ Error: Could not load Phaser.js from any CDN.<br><br>Please check your internet connection and try:<br>1. Refreshing the page<br>2. Disabling ad blockers<br>3. Checking firewall settings</div>';
                 return;
             }
+            
+            updateLoadingProgress(1, 'Loading Phaser.js...');
             
             const script = document.createElement('script');
             script.src = phaserCDNs[cdnIndex];
@@ -82,8 +143,10 @@
                 console.log('✅ Phaser.js loaded successfully from:', phaserCDNs[cdnIndex]);
                 console.log('📦 Phaser Version:', typeof Phaser !== 'undefined' ? Phaser.VERSION : 'Unknown');
                 
+                updateLoadingProgress(1, 'Phaser.js loaded!');
+                
                 // Now load all game scripts in sequence
-                loadGameScripts();
+                setTimeout(loadGameScripts, 100);
             };
             script.onerror = function() {
                 console.log('❌ Failed to load from:', phaserCDNs[cdnIndex]);
@@ -93,7 +156,18 @@
             document.head.appendChild(script);
         }
         
+        // Start loading immediately
+        updateLoadingProgress(0, 'Initializing...');
         loadPhaser();
+        
+        // Fallback: Hide loading overlay after 10 seconds if something goes wrong
+        setTimeout(() => {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay && overlay.style.display !== 'none') {
+                console.warn('Loading took too long, hiding overlay as fallback');
+                hideLoadingOverlay();
+            }
+        }, 10000);
     </script>
 
     

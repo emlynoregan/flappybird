@@ -24,6 +24,17 @@ class MenuScene extends Phaser.Scene {
         
         // Add some visual flair
         this.createFloatingElements();
+        
+        // Signal that the menu is ready - hide loading overlay
+        console.log('🎯 MenuScene created, hiding loading overlay...');
+        if (window.hideLoadingOverlay) {
+            setTimeout(() => {
+                window.hideLoadingOverlay();
+                console.log('✅ Loading overlay hidden!');
+            }, 300);
+        } else {
+            console.warn('⚠️ hideLoadingOverlay function not available');
+        }
     }
     
     createBackground() {
