@@ -1,0 +1,70 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Game Container */
+#game-container {
+    position: relative;
+    border: 3px solid #2C3E50;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: #000;
+}
+
+#game-canvas {
+    display: block;
+    border-radius: 7px;
+}
+
+/* Responsive Design */
+@media (max-width: 850px) {
+    #game-container {
+        border: 2px solid #2C3E50;
+        margin: 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 5px;
+    }
+    
+    #game-container {
+        border: 1px solid #2C3E50;
+        margin: 5px;
+    }
+}
+
+/* Loading Indicator */
+.loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    z-index: 1000;
+}
+
+/* Mobile Touch Optimization */
+@media (hover: none) and (pointer: coarse) {
+    body {
+        touch-action: manipulation;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+} 

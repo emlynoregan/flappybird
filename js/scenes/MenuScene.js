@@ -1,0 +1,291 @@
+class MenuScene extends Phaser.Scene {
+    constructor() {
+        super({ key: 'MenuScene' });
+    }
+    
+    create() {
+        // Create background
+        this.createBackground();
+        
+        // Create title
+        this.createTitle();
+        
+        // Create high score display
+        this.createHighScoreDisplay();
+        
+        // Create play button
+        this.createPlayButton();
+        
+        // Create instructions
+        this.createInstructions();
+        
+        // Setup input
+        this.setupInput();
+        
+        // Add some visual flair
+        this.createFloatingElements();
+    }
+    
+    createBackground() {
+        // Create a gradient background effect
+        this.backgroundGraphics = this.add.graphics();
+        
+        // Sky gradient
+        this.backgroundGraphics.fillGradientStyle(0x87CEEB, 0x87CEEB, 0x98D8E8, 0x98D8E8, 1);
+        this.backgroundGraphics.fillRect(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT);
+        
+        // Ground
+        this.backgroundGraphics.fillStyle(CONFIG.COLORS.GROUND);
+        this.backgroundGraphics.fillRect(0, CONFIG.GAME_HEIGHT - CONFIG.GROUND_HEIGHT, CONFIG.GAME_WIDTH, CONFIG.GROUND_HEIGHT);
+        
+        // Add some decorative clouds
+        this.createClouds();
+    }
+    
+    createClouds() {
+        // Simple cloud shapes for decoration
+        const cloudColor = 0xFFFFFF;
+        const cloudAlpha = 0.8;
+        
+        for (let i = 0; i < 3; i++) {
+            const cloud = this.add.graphics();
+            cloud.fillStyle(cloudColor, cloudAlpha);
+            
+            const x = Phaser.Math.Between(100, CONFIG.GAME_WIDTH - 100);
+            const y = Phaser.Math.Between(50, 200);
+            
+            // Draw simple cloud shape
+            cloud.fillCircle(x, y, 30);
+            cloud.fillCircle(x + 25, y, 35);
+            cloud.fillCircle(x + 50, y, 30);
+            cloud.fillCircle(x + 25, y - 20, 25);
+            
+            // Add gentle floating animation
+            this.tweens.add({
+                targets: cloud,
+                x: x + 20,
+                duration: 4000 + i * 1000,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
+            });
+        }
+    }
+    
+    createTitle() {
+        // Main title
+        this.titleText = this.add.text(CONFIG.GAME_WIDTH / 2, 120, 'FLAPPY BIRD', {
+            fontSize: '48px',
+            fill: '#FFD700',
+            fontFamily: 'Courier New',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 4,
+            shadow: {
+                offsetX: 3,
+                offsetY: 3,
+                color: '#000000',
+                blur: 2,
+                fill: true
+            }
+        }).setOrigin(0.5);
+        
+        // Add subtle bounce animation
+        this.tweens.add({
+            targets: this.titleText,
+            scaleX: 1.05,
+            scaleY: 1.05,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        
+        // Subtitle
+        this.subtitleText = this.add.text(CONFIG.GAME_WIDTH / 2, 170, 'Web Edition', {
+            fontSize: '18px',
+            fill: '#FFFFFF',
+            fontFamily: 'Courier New',
+            fontStyle: 'italic'
+        }).setOrigin(0.5);
+    }
+    
+    createHighScoreDisplay() {
+        const highScore = this.getHighScore();
+        
+        // High score background
+        const bgWidth = 200;
+        const bgHeight = 60;
+        const bgX = CONFIG.GAME_WIDTH / 2 - bgWidth / 2;
+        const bgY = 220;
+        
+        this.highScoreBg = this.add.graphics();
+        this.highScoreBg.fillStyle(0x000000, 0.3);
+        this.highScoreBg.fillRoundedRect(bgX, bgY, bgWidth, bgHeight, 10);
+        this.highScoreBg.lineStyle(2, 0xFFFFFF, 0.5);
+        this.highScoreBg.strokeRoundedRect(bgX, bgY, bgWidth, bgHeight, 10);
+        
+        // High score text
+        this.highScoreLabel = this.add.text(CONFIG.GAME_WIDTH / 2, bgY + 15, 'HIGH SCORE', {
+            fontSize: '14px',
+            fill: '#FFFFFF',
+            fontFamily: 'Courier New'
+        }).setOrigin(0.5);
+        
+        this.highScoreValue = this.add.text(CONFIG.GAME_WIDTH / 2, bgY + 35, highScore.toString(), {
+            fontSize: '24px',
+            fill: '#FFD700',
+            fontFamily: 'Courier New',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+    }
+    
+    createPlayButton() {
+        // Play button background
+        const buttonWidth = 160;
+        const buttonHeight = 50;
+        const buttonX = CONFIG.GAME_WIDTH / 2 - buttonWidth / 2;
+        const buttonY = 320;
+        
+        this.playButton = this.add.graphics();
+        this.playButton.fillStyle(0x32CD32, 1);
+        this.playButton.fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+        this.playButton.lineStyle(3, 0x228B22);
+        this.playButton.strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+        
+        // Play button text
+        this.playButtonText = this.add.text(CONFIG.GAME_WIDTH / 2, buttonY + buttonHeight / 2, 'PLAY', {
+            fontSize: '24px',
+            fill: '#FFFFFF',
+            fontFamily: 'Courier New',
+            fontStyle: 'bold'
+        }).setOrigin(0.5);
+        
+        // Make button interactive
+        const buttonBounds = new Phaser.Geom.Rectangle(buttonX, buttonY, buttonWidth, buttonHeight);
+        this.playButton.setInteractive(buttonBounds, Phaser.Geom.Rectangle.Contains);
+        this.playButtonText.setInteractive(buttonBounds, Phaser.Geom.Rectangle.Contains);
+        
+        // Button hover effects
+        this.playButton.on('pointerover', () => {
+            this.playButton.clear();
+            this.playButton.fillStyle(0x3EE83E, 1);
+            this.playButton.fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+            this.playButton.lineStyle(3, 0x228B22);
+            this.playButton.strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+        });
+        
+        this.playButton.on('pointerout', () => {
+            this.playButton.clear();
+            this.playButton.fillStyle(0x32CD32, 1);
+            this.playButton.fillRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+            this.playButton.lineStyle(3, 0x228B22);
+            this.playButton.strokeRoundedRect(buttonX, buttonY, buttonWidth, buttonHeight, 10);
+        });
+        
+        this.playButton.on('pointerdown', () => {
+            this.startGame();
+        });
+        
+        this.playButtonText.on('pointerdown', () => {
+            this.startGame();
+        });
+    }
+    
+    createInstructions() {
+        const instructions = [
+            'Click, Tap, or Press SPACE to flap',
+            'Navigate through the pipes to score',
+            'Avoid hitting pipes, ground, or ceiling'
+        ];
+        
+        let yOffset = 420;
+        instructions.forEach(instruction => {
+            this.add.text(CONFIG.GAME_WIDTH / 2, yOffset, instruction, {
+                fontSize: '14px',
+                fill: '#FFFFFF',
+                fontFamily: 'Courier New',
+                align: 'center'
+            }).setOrigin(0.5);
+            yOffset += 25;
+        });
+    }
+    
+    createFloatingElements() {
+        // Create a simple decorative bird that floats around
+        this.decorativeBird = this.add.graphics();
+        this.decorativeBird.fillStyle(CONFIG.COLORS.BIRD);
+        this.decorativeBird.fillRect(-12, -12, 24, 24);
+        this.decorativeBird.x = 100;
+        this.decorativeBird.y = 250;
+        
+        // Floating animation
+        this.tweens.add({
+            targets: this.decorativeBird,
+            y: 280,
+            duration: 1500,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+        
+        this.tweens.add({
+            targets: this.decorativeBird,
+            rotation: 0.2,
+            duration: 2000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+    }
+    
+    setupInput() {
+        // Keyboard input
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+        
+        this.spaceKey.on('down', () => {
+            this.startGame();
+        });
+        
+        this.enterKey.on('down', () => {
+            this.startGame();
+        });
+        
+        // Click anywhere to start (except button area which has its own handler)
+        this.input.on('pointerdown', (pointer) => {
+            // Check if click is not on the play button
+            const buttonArea = new Phaser.Geom.Rectangle(
+                CONFIG.GAME_WIDTH / 2 - 80, 
+                320, 
+                160, 
+                50
+            );
+            if (!buttonArea.contains(pointer.x, pointer.y)) {
+                this.startGame();
+            }
+        });
+    }
+    
+    startGame() {
+        // Add transition effect
+        this.cameras.main.fadeOut(300, 0, 0, 0);
+        
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.scene.start('GameScene');
+        });
+    }
+    
+    getHighScore() {
+        try {
+            const data = localStorage.getItem(CONFIG.STORAGE_KEY);
+            if (data) {
+                const gameData = JSON.parse(data);
+                return gameData.highScore || 0;
+            }
+        } catch (e) {
+            console.log('Error loading high score:', e);
+        }
+        return 0;
+    }
+} 
