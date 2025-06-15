@@ -116,7 +116,7 @@ class MenuScene extends Phaser.Scene {
         });
         
         // Subtitle
-        this.subtitleText = this.add.text(CONFIG.GAME_WIDTH / 2, 170, 'Web Edition', {
+        this.subtitleText = this.add.text(CONFIG.GAME_WIDTH / 2, 170, 'Vibe Edition by Emlyn O\'Regan June 2025', {
             fontSize: '18px',
             fill: '#FFFFFF',
             fontFamily: 'Courier New',
