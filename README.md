@@ -37,22 +37,9 @@ A professionally polished browser-based implementation of the classic Flappy Bir
    cd flappy
    ```
 
-2. **Start a local server** (required for loading assets)
-   ```bash
-   # Python 3
-   python -m http.server 8000
-   
-   # Python 2
-   python -m SimpleHTTPServer 8000
-   
-   # Node.js
-   npx http-server
-   ```
-
-3. **Open in browser**
-   ```
-   http://localhost:8000
-   ```
+2. **Open the game**
+   - Simply double-click `index.html` to open in your browser
+   - Or drag `index.html` into your browser window
 
 ## 🎮 How To Play
 
@@ -182,31 +169,6 @@ Educational project for learning game development. Flappy Bird is a trademark of
 
 **🎉 Ready to Play!** - A complete, polished Flappy Bird experience with professional-quality graphics, progressive difficulty, and immersive audio. Perfect collision detection and smooth 60fps gameplay make this a truly engaging web game.
 
-**🌐 Play Online:** [https://emlynoregan.com/flappy/](https://emlynoregan.com/flappy/)
+**🌐 Play Online:** [https://emlynoregan.com/flappybird/](https://emlynoregan.com/flappybird/)
 
-**Local Development:** Run a local server and open `http://localhost:8000`
-
----
-
-**Current Status:** 🌟 **Phase 2 Complete!** - Professional game experience with full scene management!
-
-**Ready to play:** Open `index.html` in your browser for the full experience.
-
-**Game Features:**
-- 🎮 **Professional Menu** - Beautiful title screen with high score display and animated elements
-- 💀 **Game Over Screen** - Dedicated scene with score summary, new high score detection, and navigation options
-- 🎯 **Core Gameplay** - All original Flappy Bird mechanics with smooth physics and collision detection
-- 🎨 **Visual Polish** - Enhanced UI with shadows, gradients, hover effects, and smooth transitions
-- 📱 **Multiple Input Methods** - Mouse, touch, keyboard support with visual feedback
-- 💾 **Score Persistence** - High scores saved automatically between sessions
-
-**Controls:**
-- **Menu:** Click Play button, or press SPACE/ENTER to start
-- **Game:** Click, tap, or press SPACE to flap the bird
-- **Game Over:** SPACE to restart, ESC for menu, or use the buttons
-
-**Developer Tools:** `FlappyBirdUtils.resetHighScore()`, `FlappyBirdUtils.toggleDebug()`
-
-#   f l a p p y b i r d 
- 
- 
+**Local Development:** Simply open `index.html` in your browser 

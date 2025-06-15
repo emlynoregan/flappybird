@@ -66,6 +66,12 @@ const PHASER_CONFIG = {
     height: CONFIG.GAME_HEIGHT,
     parent: 'game-canvas',
     backgroundColor: CONFIG.COLORS.BACKGROUND,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: CONFIG.GAME_WIDTH,
+        height: CONFIG.GAME_HEIGHT
+    },
     physics: {
         default: 'arcade',
         arcade: {
