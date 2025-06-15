@@ -2,6 +2,8 @@
 
 A professionally polished browser-based implementation of the classic Flappy Bird game featuring advanced graphics, progressive difficulty, and immersive audio. Built with modern web technologies and zero dependencies.
 
+> **🚀 Development Story:** This complete game was vibe coded in just under three hours end to end using **Claude-4-Sonnet** via **Cursor's Agent**, in _YOLO mode_. From initial concept to production deployment with professional polish, progressive difficulty, immersive audio, and responsive design!
+
 ## 🎮 Game Features
 
 ### 🎯 **Core Gameplay**
@@ -171,4 +173,21 @@ Educational project for learning game development. Flappy Bird is a trademark of
 
 **🌐 Play Online:** [https://emlynoregan.com/flappybird/](https://emlynoregan.com/flappybird/)
 
-**Local Development:** Simply open `index.html` in your browser 
+**Local Development:** Simply open `index.html` in your browser
+
+## 🤖 AI-Powered Development
+
+This game showcases the incredible power of modern AI-assisted development:
+
+- **⚡ Speed:** Complete professional-quality game in under 3 hours
+- **🤖 AI Partner:** Claude-4-Sonnet via Cursor's Agent
+- **🚀 Development Style:** YOLO mode - rapid iteration and experimentation
+- **📈 Full Stack:** From game logic to deployment, graphics to audio
+- **✨ Professional Quality:** Production-ready with polish and features
+
+### **Development Timeline:**
+1. **Hour 1:** Core gameplay mechanics, physics, collision detection
+2. **Hour 2:** Graphics enhancement, audio system, difficulty scaling
+3. **Hour 3:** UI polish, responsive design, deployment setup
+
+The collaboration between human creativity and AI capability resulted in a feature-complete game that rivals commercial mobile games! 
