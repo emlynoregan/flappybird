@@ -220,6 +220,95 @@ class GameScene extends Phaser.Scene {
             fontFamily: 'Courier New'
         });
         this.difficultyText.setOrigin(0.5, 0);
+        
+        // Create mute button
+        this.createMuteButton();
+    }
+    
+    createMuteButton() {
+        // Mute button in top-right corner
+        const buttonSize = 30;
+        const buttonX = CONFIG.GAME_WIDTH - buttonSize - 10;
+        const buttonY = 10;
+        
+        // Get sound manager from registry or use the current one
+        const soundManager = this.registry.get('soundManager') || this.soundManager;
+        this.registry.set('soundManager', soundManager);
+        this.soundManager = soundManager; // Use the shared instance
+        
+        // Button background
+        this.muteButton = this.add.graphics();
+        this.updateMuteButtonGraphics(soundManager.isEnabled());
+        
+        // Button text (speaker icon)
+        this.muteButtonText = this.add.text(buttonX + buttonSize / 2, buttonY + buttonSize / 2, '🔊', {
+            fontSize: '16px',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        
+        // Make button interactive
+        const buttonBounds = new Phaser.Geom.Rectangle(buttonX, buttonY, buttonSize, buttonSize);
+        this.muteButton.setInteractive(buttonBounds, Phaser.Geom.Rectangle.Contains);
+        this.muteButtonText.setInteractive(buttonBounds, Phaser.Geom.Rectangle.Contains);
+        
+        // Button click handler
+        const toggleMute = () => {
+            const isEnabled = soundManager.toggle();
+            this.updateMuteButtonGraphics(isEnabled);
+            this.muteButtonText.setText(isEnabled ? '🔊' : '🔇');
+            
+            // Save mute state to localStorage
+            try {
+                localStorage.setItem('flappyBird_muted', !isEnabled);
+            } catch (e) {
+                console.log('Could not save mute state:', e);
+            }
+        };
+        
+        this.muteButton.on('pointerdown', toggleMute);
+        this.muteButtonText.on('pointerdown', toggleMute);
+        
+        // Button hover effects
+        this.muteButton.on('pointerover', () => {
+            this.muteButton.setAlpha(0.8);
+        });
+        
+        this.muteButton.on('pointerout', () => {
+            this.muteButton.setAlpha(1);
+        });
+        
+        // Load saved mute state
+        try {
+            const savedMuted = localStorage.getItem('flappyBird_muted');
+            if (savedMuted === 'true') {
+                soundManager.enabled = false;
+                this.updateMuteButtonGraphics(false);
+                this.muteButtonText.setText('🔇');
+            }
+        } catch (e) {
+            console.log('Could not load mute state:', e);
+        }
+    }
+    
+    updateMuteButtonGraphics(isEnabled) {
+        const buttonSize = 30;
+        const buttonX = CONFIG.GAME_WIDTH - buttonSize - 10;
+        const buttonY = 10;
+        
+        this.muteButton.clear();
+        
+        if (isEnabled) {
+            // Sound enabled - green button
+            this.muteButton.fillStyle(0x32CD32, 0.7);
+            this.muteButton.lineStyle(1, 0x228B22);
+        } else {
+            // Sound disabled - red button
+            this.muteButton.fillStyle(0xFF4444, 0.7);
+            this.muteButton.lineStyle(1, 0xCC2222);
+        }
+        
+        this.muteButton.fillRoundedRect(buttonX, buttonY, buttonSize, buttonSize, 6);
+        this.muteButton.strokeRoundedRect(buttonX, buttonY, buttonSize, buttonSize, 6);
     }
     
     showStartInstructions() {

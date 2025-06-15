@@ -93,6 +93,28 @@ window.FlappyBirdUtils = {
                 console.log('Debug mode:', gameScene.physics.world.drawDebug ? 'ON' : 'OFF');
             }
         }
+    },
+    
+    // Toggle mute
+    toggleMute: () => {
+        if (window.flappyBirdGame && window.flappyBirdGame.game) {
+            const registry = window.flappyBirdGame.game.registry;
+            const soundManager = registry.get('soundManager');
+            if (soundManager) {
+                const isEnabled = soundManager.toggle();
+                console.log('Sound:', isEnabled ? 'ON' : 'OFF');
+                
+                // Save mute state
+                try {
+                    localStorage.setItem('flappyBird_muted', !isEnabled);
+                } catch (e) {
+                    console.log('Could not save mute state:', e);
+                }
+                
+                return isEnabled;
+            }
+        }
+        return false;
     }
 };
 

@@ -23,6 +23,9 @@ class GameOverScene extends Phaser.Scene {
         // Create action buttons
         this.createButtons();
         
+        // Create mute button
+        this.createMuteButton();
+        
         // Setup input
         this.setupInput();
         
@@ -165,6 +168,95 @@ class GameOverScene extends Phaser.Scene {
         this.instructionText.setAlpha(0);
     }
     
+    createMuteButton() {
+        // Mute button in top-right corner
+        const buttonSize = 35;
+        const buttonX = CONFIG.GAME_WIDTH - buttonSize - 15;
+        const buttonY = 15;
+        
+        // Get sound manager from registry
+        const soundManager = this.registry.get('soundManager') || new SoundManager();
+        this.registry.set('soundManager', soundManager);
+        
+        // Button background
+        this.muteButton = this.add.graphics();
+        this.updateMuteButtonGraphics(soundManager.isEnabled());
+        
+        // Button text (speaker icon)
+        this.muteButtonText = this.add.text(buttonX + buttonSize / 2, buttonY + buttonSize / 2, '🔊', {
+            fontSize: '18px',
+            fontFamily: 'Arial'
+        }).setOrigin(0.5);
+        
+        // Make button interactive
+        const buttonBounds = new Phaser.Geom.Rectangle(buttonX, buttonY, buttonSize, buttonSize);
+        this.muteButton.setInteractive(buttonBounds, Phaser.Geom.Rectangle.Contains);
+        this.muteButtonText.setInteractive(buttonBounds, Phaser.Geom.Rectangle.Contains);
+        
+        // Button click handler
+        const toggleMute = () => {
+            const isEnabled = soundManager.toggle();
+            this.updateMuteButtonGraphics(isEnabled);
+            this.muteButtonText.setText(isEnabled ? '🔊' : '🔇');
+            
+            // Save mute state to localStorage
+            try {
+                localStorage.setItem('flappyBird_muted', !isEnabled);
+            } catch (e) {
+                console.log('Could not save mute state:', e);
+            }
+        };
+        
+        this.muteButton.on('pointerdown', toggleMute);
+        this.muteButtonText.on('pointerdown', toggleMute);
+        
+        // Button hover effects
+        this.muteButton.on('pointerover', () => {
+            this.muteButton.setAlpha(0.8);
+        });
+        
+        this.muteButton.on('pointerout', () => {
+            this.muteButton.setAlpha(1);
+        });
+        
+        // Load saved mute state
+        try {
+            const savedMuted = localStorage.getItem('flappyBird_muted');
+            if (savedMuted === 'true') {
+                soundManager.enabled = false;
+                this.updateMuteButtonGraphics(false);
+                this.muteButtonText.setText('🔇');
+            }
+        } catch (e) {
+            console.log('Could not load mute state:', e);
+        }
+        
+        // Initially hide mute button
+        this.muteButton.setAlpha(0);
+        this.muteButtonText.setAlpha(0);
+    }
+    
+    updateMuteButtonGraphics(isEnabled) {
+        const buttonSize = 35;
+        const buttonX = CONFIG.GAME_WIDTH - buttonSize - 15;
+        const buttonY = 15;
+        
+        this.muteButton.clear();
+        
+        if (isEnabled) {
+            // Sound enabled - green button
+            this.muteButton.fillStyle(0x32CD32, 0.8);
+            this.muteButton.lineStyle(2, 0x228B22);
+        } else {
+            // Sound disabled - red button
+            this.muteButton.fillStyle(0xFF4444, 0.8);
+            this.muteButton.lineStyle(2, 0xCC2222);
+        }
+        
+        this.muteButton.fillRoundedRect(buttonX, buttonY, buttonSize, buttonSize, 8);
+        this.muteButton.strokeRoundedRect(buttonX, buttonY, buttonSize, buttonSize, 8);
+    }
+    
     createButton(x, y, width, height, text, color, callback) {
         // Button background
         const button = this.add.graphics();
@@ -260,11 +352,19 @@ class GameOverScene extends Phaser.Scene {
             targets: this.children.list.filter(child => 
                 child.type === 'Text' && child !== this.gameOverText && 
                 child !== this.scoreValue && child !== this.highScoreValue && 
-                child !== this.newHighScoreText
+                child !== this.newHighScoreText && child !== this.muteButtonText
             ),
             alpha: 1,
             duration: 400,
             delay: 1000
+        });
+        
+        // Fade in mute button separately
+        this.tweens.add({
+            targets: [this.muteButton, this.muteButtonText],
+            alpha: 1,
+            duration: 400,
+            delay: 500
         });
     }
     

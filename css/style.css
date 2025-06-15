@@ -426,4 +426,18 @@ body {
     #loading-status {
         font-size: 12px;
     }
+}
+
+/* Ensure mute button is always visible and accessible */
+#game-canvas canvas {
+    position: relative;
+}
+
+/* Make sure UI elements don't interfere with game canvas scaling */
+@media (max-width: 480px) {
+    /* Ensure game canvas has proper touch targets for mute button */
+    #game-canvas {
+        position: relative;
+        touch-action: manipulation;
+    }
 } 
