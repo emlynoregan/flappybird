@@ -182,7 +182,7 @@ Educational project for learning game development. Flappy Bird is a trademark of
 
 **🎉 Ready to Play!** - A complete, polished Flappy Bird experience with professional-quality graphics, progressive difficulty, and immersive audio. Perfect collision detection and smooth 60fps gameplay make this a truly engaging web game.
 
-**🌐 Play Online:** [https://emlynoregan.github.io/flappy/](https://emlynoregan.github.io/flappy/)
+**🌐 Play Online:** [https://emlynoregan.com/flappy/](https://emlynoregan.com/flappy/)
 
 **Local Development:** Run a local server and open `http://localhost:8000`
 
